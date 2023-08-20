@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STAGE</title>
+    <style>
+        .modal-lg .modal-content {
+            width: 90%;
+            max-height: 80vh;
+        }
+    </style>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+<body>
+
+
+
+
+    
+
+
+
+<div class="container-fluid" >
+
+    <div class="row">
+        <div class="col-sm-2"></div>
+
+        <div class="col-sm-8">
+
+<h2 >Article List <button class="btn btn-primary float-right" data-toggle="modal" data-target="#myModal">Add Article</button> </h2>
+<h2 >Search <button class="btn btn-primary float-right" data-toggle="modal" data-target="#myModal2">Search</button> </h2>
+<h2 ><button id="showChartButton" class="btn btn-primary float-right" data-toggle="modal" data-target="#chartModal">Show IOC Distributions</button></h2>
+
+
+
+<div id="myModal2" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-lg"> 
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title text-primary" style="align-content: center;">Search</h5>    
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              
+
+            <div class="modal-body">
+                <input type="text" id="livebox" class="livebox">
+                <div id="datalist" style="max-height: 200px; overflow-y: auto;">
+                    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Source</th>
+                <th>IOC Type</th>
+                <th>IOC Info</th>
+                <th>AG</th>
+                <th>Vulnerabilities</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+
+
+    <div id="myModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+   
+                <div class="modal-header">
+                    <h5 class="modal-title text-primary" style="align-content: center;">Add A New Article</h5>    
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  
+
+                <div class="modal-body">
+                    
+                    <form action="{{ url_for('insert')}}" method="POST">
+                        <div class="form-group">
+                          <label>Title</label>
+                          <input type="text" name="Title" class="form-control" id="exampleFormControlInput1">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Author</label>
+                            <input type="text" name="Author" class="form-control" id="exampleFormControlInput1">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Source</label>
+                            <input name="Source" type="text" class="form-control" id="exampleFormControlInput1">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>IOC TYPES</label><br>
+                            <select name="IOCT" id="IOCT" multiple>
+                                <option value="URL">URL</option>
+                                <option value="IP">IP</option>
+                                <option value="Domain">Domain</option>
+                                <option value="File">File</option> 
+                                <option value="Hash">Hash</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>IOC INFO</label>
+                            <input type="text" name="IOC" class="form-control" id="IOC" placeholder="Enter IOC info separated by commas">
+                        </div>
+
+                        <div class="form-group">
+                            <label>AG</label>
+                            <input type="text" name="AG" class="form-control" id="exampleFormControlInput1">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Vulnerabilities</label>
+                            <input type="text" name="Vulnerabilities" class="form-control" id="exampleFormControlInput1">
+                        </div>
+
+                          <button type="submit" class="btn btn-primary mb-2" onclick="verify()">Save</button>
+                     
+                      </form>
+
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-4">
+                <canvas id="iocPieChart" width="400" height="400"></canvas>
+            </div>
+            <div class="col-lg-8">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">Author</th>
+                            <th scope="col">Title</th>
+                            <th scope="col">Source</th>
+                            <th scope="col">IOC TYPE</th>
+                            <th scope="col">IOC INFO</th>
+                            <th scope="col">AG</th>
+                            <th scope="col">Vulnerabilities</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in Article %}
+                        <tr class="article-row" data-id="{{ row.0 }}">
+                            <td>{{row.2}}</td>
+                            <td>{{row.1}}</td>
+                            <td>{{row.3}}</td>
+                            <td>{{row.4}}</td>
+                            <td>{{row.5}}</td>
+                            <td>{{row.6}}</td>
+                            <td>{{row.7}}</td>
+                
+                            <td>
+                                <a href="/update/{{row.0}}" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#modaledit{{row.0}}">Edit</a>
+                                <a href="/delete/{{ row.0 }}" onclick="return confirm('Are you sure you want to delete this record?')" class="btn btn-danger btn-sm">Delete</a>
+                            <button class="btn btn-link view-article-btn" data-toggle="modal" data-target="#viewArticleModal{{ row.0 }}">View Article</button>
+            
+                            </tr>
+            
+            
+                    <div id="modaledit{{row.0}}" class="modal fade" role="dialog">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                   
+                                <div class="modal-header">
+                                    <h5 class="modal-title text-primary" style="align-content: center;">Update Article Details</h5>    
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                      <span aria-hidden="true">&times;</span>
+                                    </button>
+                                  </div>
+                                  
+                
+                                <div class="modal-body">
+                                    
+                                    <form action="{{ url_for('update')}}" method="POST">
+                                        <input type="hidden" name="id" value="{{row.0}}">
+                                        <div class="form-group">
+                                          <label>Author</label>
+                                          <input value="{{row.2}}" type="text" name="Title" class="form-control" id="exampleFormControlInput1">
+                                        </div>
+                
+                                        <div class="form-group">
+                                            <label>Title</label>
+                                            <input value="{{row.1}}" type="text" name="Author" class="form-control" id="exampleFormControlInput1">
+                                        </div>
+                
+                                        <div class="form-group">
+                                            <label>Source</label>
+                                            <input value="{{row.3}}" name="Source" type="text" class="form-control" id="exampleFormControlInput1">
+                                          </div>
+            
+                                          <div class="form-group">
+                                            <label>IOC TYPE</label><br>
+                                            <select name="IOCT" id="IOCT" onchange="toggleIOCInputType()">
+                                                <option value="URL">URL</option>
+                                                <option value="IP">IP</option>
+                                                <option value="Domain">Domain</option>
+                                                <option value="File">File</option> 
+                                                <option value="Hash">Hash</option>
+                                            </select>
+                                            <div id="iocInputField"></div>
+                                        </div>
+            
+                                        <div class="form-group" id="iocInfoField">
+                                            <label>IOC INFO</label>
+                                            <input value="{{row.5}}" type="text" name="IOC" class="form-control" id="IOC" placeholder="Enter IOC info separated by commas">
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label>AG</label>
+                                            <input value="{{row.6}}" name="AG" type="text" class="form-control" id="exampleFormControlInput1">
+                                        </div>
+            
+                                        <div class="form-group">
+                                            <label>Vulnerabilities</label>
+                                            <input value="{{row.7}}" name="Vulnerabilities" type="text" class="form-control" id="exampleFormControlInput1">
+                                        </div>
+            
+            
+                
+                                          <button type="submit" class="btn btn-success mb-2">Update</button>
+                                     
+                                      </form>
+                
+                
+                                </div>
+                            </div>
+                        </div>
+                
+                    </div>
+                
+                
+            
+            
+            
+            
+                    {% endfor %}
+                </tbody>
+            
+            </table>
+                        </div>
+            
+            
+                        <div class="col-sm-2"></div>
+            
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    {% for row in Article %}
+    <div class="modal fade" id="viewArticleModal{{ row.0 }}" tabindex="-1" role="dialog" aria-labelledby="viewArticleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="viewArticleModalLabel">Article Details</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <h1>{{ row.1 }}</h1>
+                    <p>Author: {{ row.2 }}</p>
+                    <p>Source: {{ row.3 }}</p>
+                    <p>IOC Type: {{ row.4 }}</p>
+                    <p>IOC Info: {{ row.5 }}</p>
+                    <p>AG: {{ row.6 }}</p>
+                    <p>Vulnerabilities: {{ row.7 }}</p>
+    
+                    <h2>Related Articles</h2>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    {% endfor %}
+    <div class="modal fade" id="chartModal" tabindex="-1" role="dialog" aria-labelledby="chartModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="chartModalLabel">IOC Type Distribution</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="chart-container" style="position: relative; height: 75%; width: 75%;">
+                        <canvas id="iocInfoPieChart" width="400" height="400"></canvas>
+                        <canvas id="urlpiechart" width="400" height="400"></canvas>
+                        <canvas id="domainpiechart" width="400" height="400"></canvas>
+                        <canvas id="hashpiechartPieChart" width="400" height="400"></canvas>
+
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+ <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.2.1.min.js') }}"></script>    
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>    
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+    <script>
+        $(document).ready(function(){
+            $("#livebox").on("keyup", function(){
+                var searchText = $(this).val();
+                $.ajax({
+                    url: "/livesearch",
+                    method: "POST",
+                    data: {
+                        text: searchText
+                    },
+                    dataType: "json",
+                    success: function(response){
+                        var tableBody = $("#datalist table tbody");
+                        tableBody.empty();
+                        $.each(response, function(index, article){
+                            var row = "<tr>";
+                            row += "<td>" + article.Title + "</td>";
+                            row += "<td>" + article.Author + "</td>";
+                            row += "<td>" + article.Source + "</td>";
+                            row += "<td>" + article.IOCT + "</td>";
+                            row += "<td>" + article.IOC + "</td>";
+                            row += "<td>" + article.AG + "</td>";
+                            row += "<td>" + article.Vulnerabilities + "</td>";
+                            row += "</tr>";
+                            tableBody.append(row);
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+    
+    <script>
+        function toggleIOCInputType() {
+            var selectedValue = document.getElementById("IOCT").value;
+            var iocInputField = document.getElementById("iocInputField");
+    
+            if (selectedValue === "Domain" || selectedValue === "Hash") {
+                iocInputField.innerHTML = '';
+            } else if (selectedValue === "File" || selectedValue === "IP" || selectedValue === "URL") {
+                iocInputField.innerHTML = '<input type="text" name="IOC" class="form-control" id="IOC">';
+            }
+        }
+    </script>
+<script>
+    $(document).ready(function () {
+        function generateChart() {
+            $.ajax({
+                url: "{{ url_for('ioc_count') }}",
+                method: "GET",
+                dataType: "json",
+                success: function (response) {
+                    var iocLabels = [];
+                    var iocCounts = [];
+
+                    for (var i = 0; i < response.length; i++) {
+                        iocLabels.push(response[i].IOCT);
+                        iocCounts.push(response[i].count);
+                    }
+
+                    var ctx = document.getElementById('iocPieChart').getContext('2d');
+                    var iocPieChart = new Chart(ctx, {
+                        type: 'pie',
+                        data: {
+                            labels: iocLabels,
+                            datasets: [{
+                                data: iocCounts,
+                                backgroundColor: ['#FF5733', '#36A2EB', '#4BC0C0', '#9966FF', '#FFCE56'],
+                            }]
+                        },
+                        options: {
+                            title: {
+                                display: true,
+                                text: 'IOC Type Count'
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+        $('#showChartButton').hover(
+            function () {
+                generateChart();
+                $('#chartContainer').slideDown();
+            },
+            function () {
+                $('#chartContainer').slideUp();
+            }
+        );
+    });
+</script>
+<script>
+    $('#chartModal').on('shown.bs.modal', function () {
+        $.ajax({
+            url: "{{ url_for('ioc_count') }}",
+            method: "GET",
+            dataType: "json",
+            success: function (response) {
+
+            }
+        });
+    });
+</script>
+
+<script>
+    $(document).ready(function () {
+        function fetchippiechartData() {
+            $.ajax({
+                url: "{{ url_for('ioc_info_ip_count') }}",
+                method: "GET",
+                dataType: "json",
+                success: function (response) {
+                    var ippiechartLabels = [];
+                    var ippiechartCounts = [];
+
+                    for (var i = 0; i < response.length; i++) {
+                        ippiechartLabels.push(response[i].IOC);
+                        ippiechartCounts.push(response[i].count);
+                    }
+
+                    var ctx = document.getElementById('ippiechartPieChart').getContext('2d');
+                    var ippiechartPieChart = new Chart(ctx, {
+                        type: 'pie',
+                        data: {
+                            labels: ippiechartLabels,
+                            datasets: [{
+                                data: ippiechartCounts,
+                                backgroundColor: [
+                                    '#FF6384',
+                                    '#36A2EB',
+                                ]
+                            }]
+                        },
+                        options: {
+                            responsive: true
+                        }
+                    });
+                }
+            });
+        }
+
+        fetchippiechartData();
+    });
+</script>
+
+<script>
+    $(document).ready(function () {
+        function fetchurlpiechartData() {
+            $.ajax({
+                url: "{{ url_for('ioc_info_url_count') }}",
+                method: "GET",
+                dataType: "json",
+                success: function (response) {
+                    var urlpiechartLabels = [];
+                    var urlpiechartCounts = [];
+
+                    for (var i = 0; i < response.length; i++) {
+                        urlpiechartLabels.push(response[i].IOC);
+                        urlpiechartCounts.push(response[i].count);
+                    }
+
+                    var ctx = document.getElementById('urlpiechart').getContext('2d');
+                    var urlpiechart = new Chart(ctx, {
+                        type: 'pie',
+                        data: {
+                            labels: urlpiechartLabels,
+                            datasets: [{
+                                data: urlpiechartCounts,
+                                backgroundColor: [
+                                    '#FF6384',
+                                    '#36A2EB',
+                                ]
+                            }]
+                        },
+                        options: {
+                            responsive: true
+                        }
+                    });
+                }
+            });
+        }
+
+        fetchurlpiechartData();
+    });
+</script>
+
+<script>
+    $(document).ready(function () {
+        function fetchdomainpiechartData() {
+            $.ajax({
+                url: "{{ url_for('ioc_info_domain_count') }}",
+                method: "GET",
+                dataType: "json",
+                success: function (response) {
+                    var domainpiechartLabels = [];
+                    var domainpiechartCounts = [];
+
+                    for (var i = 0; i < response.length; i++) {
+                        domainpiechartLabels.push(response[i].IOC);
+                        domainpiechartCounts.push(response[i].count);
+                    }
+
+                    var ctx = document.getElementById('domainpiechart').getContext('2d');
+                    var domainpiechart = new Chart(ctx, {
+                        type: 'pie',
+                        data: {
+                            labels: domainpiechartLabels, 
+                            datasets: [{
+                                data: domainpiechartCounts, 
+                                backgroundColor: [
+                                    '#FF6384',
+                                    '#36A2EB',
+                                ]
+                            }]
+                        },
+                        options: {
+                            responsive: true
+                        }
+                    });
+                }
+            });
+        }
+
+        fetchdomainpiechartData();
+    });
+</script>
+
+<script>
+    $(document).ready(function () {
+        function fetchhashpiechartData() {
+            $.ajax({
+                url: "{{ url_for('ioc_info_hash_count') }}",
+                method: "GET",
+                dataType: "json",
+                success: function (response) {
+                    var hashpiechartLabels = [];
+                    var hashpiechartCounts = [];
+
+                    for (var i = 0; i < response.length; i++) {
+                        hashpiechartLabels.push(response[i].IOC);
+                        hashpiechartCounts.push(response[i].count);
+                    }
+
+                    var ctx = document.getElementById('hashpiechartPieChart').getContext('2d');
+                    var hashpiechartPieChart = new Chart(ctx, {
+                        type: 'pie',
+                        data: {
+                            labels: hashpiechartLabels,
+                            datasets: [{
+                                data: hashpiechartCounts,
+                                backgroundColor: [
+                                    '#FF6384',
+                                    '#36A2EB',
+                                ]
+                            }]
+                        },
+                        options: {
+                            responsive: true
+                        }
+                    });
+                }
+            });
+        }
+
+        fetchhashpiechartData();
+    });
+</script>
+
+
+</body>
