@@ -68,19 +68,7 @@ def ioc_count():
 
     return jsonify(ioc_count_data)
 
-@app.route('/view_article/<int:article_id>', methods=['GET'])
-def view_article(article_id):
-    cur = mysql.connection.cursor()
 
-    cur.execute("SELECT * FROM Article WHERE id = %s", (article_id,))
-    chosen_article = cur.fetchone()
-
-    cur.execute("SELECT * FROM Article WHERE Author = %s AND Title != %s", (chosen_article[2], chosen_article[1]))
-    related_articles = cur.fetchall()
-
-    cur.close()
-
-    return render_template('response.html', chosen_article=chosen_article, related_articles=related_articles)
 
 
 
@@ -197,7 +185,18 @@ def update():
         return redirect(url_for('Index'))
 
 
+@app.route('/related_articles/<int:article_id>', methods=['GET'])
+def related_articles(article_id):
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM Article WHERE id != %s AND (Author = (SELECT Author FROM Article WHERE id = %s) OR Title = (SELECT Title FROM Article WHERE id = %s) OR Source = (SELECT Source FROM Article WHERE id = %s) OR AG = (SELECT AG FROM Article WHERE id = %s) OR Vulnerabilities = (SELECT Vulnerabilities FROM Article WHERE id = %s))", (article_id, article_id, article_id, article_id, article_id, article_id))
+    data = cur.fetchall()
+    cur.close()
+    return jsonify(data)
+
+
+
 
 
 if __name__ == "__main__":
     app.run(debug=True)
+

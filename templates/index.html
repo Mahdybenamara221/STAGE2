@@ -183,8 +183,10 @@
                             <td>
                                 <a href="/update/{{row.0}}" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#modaledit{{row.0}}">Edit</a>
                                 <a href="/delete/{{ row.0 }}" onclick="return confirm('Are you sure you want to delete this record?')" class="btn btn-danger btn-sm">Delete</a>
-                            <button class="btn btn-link view-article-btn" data-toggle="modal" data-target="#viewArticleModal{{ row.0 }}">View Article</button>
-            
+                            </td>
+                                <td>
+                                <button class="btn btn-primary article-related-btn" data-id="{{ row.0 }}" data-toggle="modal" data-target="#relatedArticlesModal">Related Articles</button>
+                                </td>
                             </tr>
             
             
@@ -282,34 +284,7 @@
 
 
 
-    {% for row in Article %}
-    <div class="modal fade" id="viewArticleModal{{ row.0 }}" tabindex="-1" role="dialog" aria-labelledby="viewArticleModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="viewArticleModalLabel">Article Details</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <h1>{{ row.1 }}</h1>
-                    <p>Author: {{ row.2 }}</p>
-                    <p>Source: {{ row.3 }}</p>
-                    <p>IOC Type: {{ row.4 }}</p>
-                    <p>IOC Info: {{ row.5 }}</p>
-                    <p>AG: {{ row.6 }}</p>
-                    <p>Vulnerabilities: {{ row.7 }}</p>
     
-                    <h2>Related Articles</h2>
-
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-    {% endfor %}
     <div class="modal fade" id="chartModal" tabindex="-1" role="dialog" aria-labelledby="chartModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -333,6 +308,36 @@
         </div>
     </div>
 
+
+    <div class="modal fade" id="relatedArticlesModal" tabindex="-1" role="dialog" aria-labelledby="relatedArticlesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="relatedArticlesModalLabel">Related Articles</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Author</th>
+                                <th>Title</th>
+                                <th>Source</th>
+                                <th>IOC Type</th>
+                                <th>IOC Info</th>
+                                <th>AG</th>
+                                <th>Vulnerabilities</th>
+                            </tr>
+                        </thead>
+                        <tbody id="relatedArticlesTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
 
  <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.2.1.min.js') }}"></script>    
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
@@ -607,6 +612,36 @@
         fetchhashpiechartData();
     });
 </script>
+<script>
+    $(document).ready(function () {
+        $('.article-related-btn').on('click', function () {
+            var articleId = $(this).data('id');
+            $.ajax({
+                url: "/related_articles/" + articleId,
+                method: "GET",
+                dataType: "json",
+                success: function (response) {
+                    var tableBody = $('#relatedArticlesTableBody');
+                    tableBody.empty();
+                    $.each(response, function (index, article) {
+                        var row = "<tr>";
+                        row += "<td>" + article.Author + "</td>";
+                        row += "<td>" + article.Title + "</td>";
+                        row += "<td>" + article.Source + "</td>";
+                        row += "<td>" + article.IOCT + "</td>";
+                        row += "<td>" + article.IOC + "</td>";
+                        row += "<td>" + article.AG + "</td>";
+                        row += "<td>" + article.Vulnerabilities + "</td>";
+                        row += "</tr>";
+                        tableBody.append(row);
+                    });
+                    $('#relatedArticlesModal').modal('show');
+                }
+            });
+        });
+    });
+</script>
+
 
 
 </body>
